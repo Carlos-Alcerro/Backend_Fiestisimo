@@ -30,7 +30,6 @@ exports.createProduct = async (req, res) => {
       description,
       price,
       image: {
-        public_id:cloudinaryUpload.public_id,
         url:cloudinaryUpload.secure_url
       },
       category,

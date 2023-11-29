@@ -19,10 +19,6 @@ const Product = connection.define('Product', {
     allowNull: false,
   },
   image: {
-    public_id:{
-      type:String,
-      require:true
-    },
     url:{
       type:String,
       require:true
