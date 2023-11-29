@@ -13,9 +13,8 @@ cloudinary.config({
 exports.createProduct = async (req, res) => {
   try {
     const { name, description, price, category,image } = req.body;
-    const cloudinaryUpload = await cloudinary.uploader.upload(image,{
-      folder:"products"
-    });
+    const cloudinaryUpload = await cloudinary.uploader.upload(image);
+    const imageURL = cloudinaryUpload.secure_url;
 
     // Verifica si el producto existe 
     const existingProduct = await Product.findOne({ where: { name } });
@@ -29,16 +28,14 @@ exports.createProduct = async (req, res) => {
       name,
       description,
       price,
-      image: {
-        url:cloudinaryUpload.secure_url
-      },
+      image: imageURL,
       category,
     });
 
     res.status(201).json({ message: "Producto registrado exitosamente", newProduct });
   } catch (error) {
     console.error('Error al registrar el producto:', error);
-    res.status(500).json({error});
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
