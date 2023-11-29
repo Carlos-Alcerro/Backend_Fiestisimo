@@ -1,42 +1,57 @@
 const Product = require('../models/products');
-const dotenv=require("dotenv")
+const dotenv = require("dotenv");
+const { writeFile } = require('fs').promises;
 const cloudinary = require('cloudinary').v2;
 
+dotenv.config();
+
 cloudinary.config({
-  cloud_name: 'disw7bgxd',
-  api_key: '417895291761179',
-  api_secret: 'g-tWxLGzVwf6VBv5amhWoiROMrM',
+  cloud_name: "disw7bgxd",
+  api_key: "417895291761179",
+  api_secret: "g-tWxLGzVwf6VBv5amhWoiROMrM",
 });
 
-
-//! Controlador para registrar nuevos productos
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, category,image } = req.body;
+    const data = await req.formData();
+    const image = data.get("image");
+    const name = data.get("name");
+    const price = data.get("price");
+    const description = data.get("description");
 
-    // Verifica si el producto existe 
+    if (!image) {
+      return res.status(400).json({ error: "No se proporcionó la imagen" });
+    }
+
+    // Validar que sea una imagen
+    const validImageFormats = ["image/jpeg", "image/png", "image/gif"];
+    if (!validImageFormats.includes(image.type)) {
+      return res.status(400).json({ error: "El archivo no es una imagen válido" });
+    }
+
+    // Cargar directamente en Cloudinary
+    const cloudinaryUpload = await cloudinary.uploader.upload(image.path);
+
+    // Verifica si el producto existe
     const existingProduct = await Product.findOne({ where: { name } });
 
     if (existingProduct) {
       return res.status(400).json({ error: 'El producto ya está registrado.' });
     }
 
-    const cloudinaryUpload = await cloudinary.uploader.upload(image);
-    const imageURL = cloudinaryUpload.secure_url;
-
     // Crea un nuevo producto
     const newProduct = await Product.create({
       name,
       description,
       price,
-      image: imageURL,
+      image: cloudinaryUpload.secure_url,
       category,
     });
 
     res.status(201).json({ message: "Producto registrado exitosamente", newProduct });
   } catch (error) {
-    console.log("ERROR AL INGRESAR EL PRODUCTO",error);
-    res.status(500).json({ error });
+    console.error("ERROR AL INGRESAR EL PRODUCTO", error);
+    res.status(500).json({ error: error.message || "Error interno del servidor" });
   }
 };
 
