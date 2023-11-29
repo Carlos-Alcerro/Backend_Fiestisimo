@@ -1,16 +1,21 @@
 const Product = require('../models/products');
 const dotenv=require("dotenv")
-const BACKEND = [process.env.FRONTEND_URL]
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: 'disw7bgxd',
+  api_key: '417895291761179',
+  api_secret: 'g-tWxLGzVwf6VBv5amhWoiROMrM',
+});
 
 //! Controlador para registrar nuevos productos
 exports.createProduct = async (req, res) => {
   try {
+    const uploadResult = await cloudinary.uploader.upload(req.file.path);
     const { name, description, price, category } = req.body;
     const ext = req.file.originalname.split('.').pop();
+    const imageURL = uploadResult.secure_url;
     
-    // Construye la ruta completa de la imagen
-    const imagePath = `${BACKEND}/images/file-${name.replace(/\s+/g, '_')}.${ext}`;
-
     // Verifica si el producto existe 
     const existingProduct = await Product.findOne({ where: { name } });
 
@@ -23,7 +28,7 @@ exports.createProduct = async (req, res) => {
       name,
       description,
       price,
-      image: imagePath,
+      image: imageURL,
       category,
     });
 
