@@ -7,7 +7,7 @@ exports.createProduct = async (req, res) => {
     const ext = req.file.originalname.split('.').pop();
     
     // Construye la ruta completa de la imagen
-    const imagePath = `http://localhost:3000/images/file-${name.replace(/\s+/g, '_')}.${ext}`;
+    const imagePath = `${import.meta.env.VITE_BACKEND_URL}/images/file-${name.replace(/\s+/g, '_')}.${ext}`;
 
     // Verifica si el producto existe 
     const existingProduct = await Product.findOne({ where: { name } });
