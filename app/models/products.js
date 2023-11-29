@@ -19,10 +19,7 @@ const Product = connection.define('Product', {
     allowNull: false,
   },
   image: {
-    url:{
-      type:String,
-      require:true
-    }
+    type: DataTypes.STRING(255),
   },
   category: {
     type: DataTypes.ENUM('Postres', 'Desayunos', 'Pasteles', 'Arreglos'),
