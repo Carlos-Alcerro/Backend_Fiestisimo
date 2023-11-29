@@ -8,14 +8,14 @@ cloudinary.config({
   api_secret: 'g-tWxLGzVwf6VBv5amhWoiROMrM',
 });
 
+
 //! Controlador para registrar nuevos productos
 exports.createProduct = async (req, res) => {
   try {
-    const uploadResult = await cloudinary.uploader.upload(req.file.path);
     const { name, description, price, category } = req.body;
-    const ext = req.file.originalname.split('.').pop();
-    const imageURL = uploadResult.secure_url;
-    
+    const cloudinaryUpload = await cloudinary.uploader.upload(req.file.path);
+    const cloudinaryImageUrl = cloudinaryUpload.secure_url;
+
     // Verifica si el producto existe 
     const existingProduct = await Product.findOne({ where: { name } });
 
@@ -28,7 +28,7 @@ exports.createProduct = async (req, res) => {
       name,
       description,
       price,
-      image: imageURL,
+      image: cloudinaryImageUrl,
       category,
     });
 
