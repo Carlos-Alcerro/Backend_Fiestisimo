@@ -36,7 +36,7 @@ exports.createProduct = async (req, res) => {
     res.status(201).json({ message: "Producto registrado exitosamente", newProduct });
   } catch (error) {
     console.error('Error al registrar el producto:', error);
-    res.status(500).json({ error: 'Error interno del servidor',details: error.message });
+    res.status(500).json({ error});
   }
 };
 
