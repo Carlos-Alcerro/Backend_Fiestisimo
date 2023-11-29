@@ -35,8 +35,7 @@ exports.createProduct = async (req, res) => {
 
     res.status(201).json({ message: "Producto registrado exitosamente", newProduct });
   } catch (error) {
-    console.error('Error al registrar el producto:', error);
-    res.status(500).json({ error});
+    res.status(500).json(error);
   }
 };
 
