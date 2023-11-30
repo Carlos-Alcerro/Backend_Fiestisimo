@@ -14,11 +14,7 @@ cloudinary.config({
 //! Controlador para registrar nuevos productos
 exports.createProduct = async (req, res) => {
   try {
-    const data = await req.formData();
-    const image=data.get("image")
-    const name = data.get("name")
-    const price=data.get("price")
-    const description=data.get("description")
+    const {name,description,price,image,category} = req.body
 
     if(!image){
       return res.status(400).json({error:"No existe la imagen"})
