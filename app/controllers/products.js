@@ -1,9 +1,8 @@
 const Product = require('../models/products');
 const dotenv=require("dotenv");
-const path = require('path');
-const { resolve } = require('path');
-const { rejects } = require('assert');
 const cloudinary = require('cloudinary').v2;
+
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -15,8 +14,11 @@ cloudinary.config({
 //! Controlador para registrar nuevos productos
 exports.createProduct = async (req, res) => {
   try {
-    const {name,description,price,image,category} = req.body
-
+    const data = await req.formData();
+    const image = data.get("image");
+    const name = data.get("name");
+    const price = data.get("price");
+    const description = data.get("description");
     if(!image){
       return res.status(400).json({error:"No existe la imagen"})
     }
@@ -33,10 +35,10 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ error: 'El producto ya está registrado.' });
     }
 
-    const result = await new Promise((resolve,rejects)=>{
+    const result = await new Promise((resolve,reject)=>{
       cloudinary.uploader.upload_stream({},(err,result)=>{
         if(err){
-          rejects(err)
+          reject(err)
         }
         resolve(result);
       }).end(buffer)
@@ -54,7 +56,7 @@ exports.createProduct = async (req, res) => {
     res.status(201).json({ message: "Producto registrado exitosamente", newProduct });
   } catch (error) {
     console.log("ERROR AL INGRESAR EL PRODUCTO",error);
-    res.status(500).json({ error });
+    res.status(500).json({ error:"Eroor interno en el servidor" });
   }
 };
 
