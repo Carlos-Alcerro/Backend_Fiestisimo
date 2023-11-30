@@ -1,7 +1,8 @@
 const Product = require('../models/products');
 const dotenv=require("dotenv");
 const path = require('path');
-const { writeFile } = require('fs').promises;
+const { resolve } = require('path');
+const { rejects } = require('assert');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
@@ -22,8 +23,8 @@ exports.createProduct = async (req, res) => {
 
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const filePath = path.join(process.cwd(),"/public/images",image.name);
-    await writeFile(filePath,buffer)
+    /* const filePath = path.join(process.cwd(),"/public/images",image.name);
+    await writeFile(filePath,buffer) */
 
     // Verifica si el producto existe 
     const existingProduct = await Product.findOne({ where: { name } });
@@ -32,14 +33,21 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ error: 'El producto ya está registrado.' });
     }
 
-    const cloudinaryUpload = await cloudinary.uploader.upload(filePath);
+    const result = await new Promise((resolve,rejects)=>{
+      cloudinary.uploader.upload_stream({},(err,result)=>{
+        if(err){
+          rejects(err)
+        }
+        resolve(result);
+      }).end(buffer)
+    })
 
     // Crea un nuevo producto
     const newProduct = await Product.create({
       name,
       description,
       price,
-      image: cloudinaryUpload.secure_url,
+      image: result.secure_url,
       category,
     });
 
