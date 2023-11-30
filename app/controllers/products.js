@@ -1,43 +1,42 @@
 const Product = require('../models/products');
-const dotenv = require("dotenv");
-const { writeFile } = require('fs').promises;
+const dotenv=require("dotenv");
+const path = require('path');
+const { writeFile } = require('fs');
 const cloudinary = require('cloudinary').v2;
 
-dotenv.config();
-
 cloudinary.config({
-  cloud_name: "disw7bgxd",
-  api_key: "417895291761179",
-  api_secret: "g-tWxLGzVwf6VBv5amhWoiROMrM",
+  cloud_name: 'disw7bgxd',
+  api_key: '417895291761179',
+  api_secret: 'g-tWxLGzVwf6VBv5amhWoiROMrM',
 });
 
+
+//! Controlador para registrar nuevos productos
 exports.createProduct = async (req, res) => {
   try {
     const data = await req.formData();
-    const image = data.get("image");
-    const name = data.get("name");
-    const price = data.get("price");
-    const description = data.get("description");
+    const image=data.get("image")
+    const name = data.get("name")
+    const price=data.get("price")
+    const description=data.get("description")
 
-    if (!image) {
-      return res.status(400).json({ error: "No se proporcionó la imagen" });
+    if(!image){
+      return res.status(400).json({error:"No existe la imagen"})
     }
 
-    // Validar que sea una imagen
-    const validImageFormats = ["image/jpeg", "image/png", "image/gif"];
-    if (!validImageFormats.includes(image.type)) {
-      return res.status(400).json({ error: "El archivo no es una imagen válido" });
-    }
+    const bytes = await image.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const filePath = path.join(process.cwd(),"public/images",image.name);
+    await writeFile(filePath,buffer)
 
-    // Cargar directamente en Cloudinary
-    const cloudinaryUpload = await cloudinary.uploader.upload(image.path);
-
-    // Verifica si el producto existe
+    // Verifica si el producto existe 
     const existingProduct = await Product.findOne({ where: { name } });
 
     if (existingProduct) {
       return res.status(400).json({ error: 'El producto ya está registrado.' });
     }
+
+    const cloudinaryUpload = await cloudinary.uploader.upload(filePath);
 
     // Crea un nuevo producto
     const newProduct = await Product.create({
@@ -50,8 +49,8 @@ exports.createProduct = async (req, res) => {
 
     res.status(201).json({ message: "Producto registrado exitosamente", newProduct });
   } catch (error) {
-    console.error("ERROR AL INGRESAR EL PRODUCTO", error);
-    res.status(500).json({ error: error.message || "Error interno del servidor" });
+    console.log("ERROR AL INGRESAR EL PRODUCTO",error);
+    res.status(500).json({ error });
   }
 };
 
