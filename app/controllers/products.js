@@ -12,49 +12,32 @@ cloudinary.config({
 
 
 //! Controlador para registrar nuevos productos
-exports.createProduct = async (req, res) => {
+exports.createProduct = async (req, res,next) => {
+  const { name, description, price, image, category } = req.body;
+
+
   try {
-  
-    const { name, description, price, category } = req.body;
+      const result = await cloudinary.uploader.upload(image, {
+          folder: "products",
+          // width: 300,
+          // crop: "scale"
+      })
+      const product = await Product.create({
+          name,
+          description,
+          price,
+          image:result.secure_url,
+          category
+      });
+      res.status(201).json({
+          success: true,
+          product
+      })
 
-    if(!image){
-      return res.status(400).json({error:"No existe la imagen"})
-    }
-
-    const bytes = await image.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    /* const filePath = path.join(process.cwd(),"/public/images",image.name);
-    await writeFile(filePath,buffer) */
-
-    // Verifica si el producto existe 
-    const existingProduct = await Product.findOne({ where: { name } });
-
-    if (existingProduct) {
-      return res.status(400).json({ error: 'El producto ya está registrado.' });
-    }
-
-    const result = await new Promise((resolve,reject)=>{
-      cloudinary.uploader.upload_stream({},(err,result)=>{
-        if(err){
-          reject(err)
-        }
-        resolve(result);
-      }).end(buffer)
-    })
-
-    // Crea un nuevo producto
-    const newProduct = await Product.create({
-      name,
-      description,
-      price,
-      image: result.secure_url,
-      category,
-    });
-
-    res.status(201).json({ message: "Producto registrado exitosamente", newProduct });
   } catch (error) {
-    console.log("ERROR AL INGRESAR EL PRODUCTO",error);
-    res.status(500).json({ error:"Eroor interno en el servidor" });
+      console.log(error);
+      next(error);
+
   }
 };
 
