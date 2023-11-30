@@ -1,13 +1,13 @@
 const Product = require('../models/products');
 const dotenv=require("dotenv");
 const path = require('path');
-const { writeFile } = require('fs');
+const { writeFile } = require('fs').promises;
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
-  cloud_name: 'disw7bgxd',
-  api_key: '417895291761179',
-  api_secret: 'g-tWxLGzVwf6VBv5amhWoiROMrM',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 
@@ -26,7 +26,7 @@ exports.createProduct = async (req, res) => {
 
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const filePath = path.join(process.cwd(),"public/images",image.name);
+    const filePath = path.join(process.cwd(),"/public/images",image.name);
     await writeFile(filePath,buffer)
 
     // Verifica si el producto existe 
