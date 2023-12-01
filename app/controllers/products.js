@@ -1,5 +1,5 @@
 const Product = require('../models/products');
-const dotenv=require("dotenv");
+const dotenv = require('dotenv');
 const cloudinary = require('cloudinary').v2;
 
 dotenv.config();
@@ -10,36 +10,29 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
 //! Controlador para registrar nuevos productos
-exports.createProduct = async (req, res,next) => {
+exports.createProduct = async (req, res, next) => {
   const { name, description, price, image, category } = req.body;
 
-
   try {
-      const result = await cloudinary.uploader.upload(image, {
-          folder: "products",
-          // width: 300,
-          // crop: "scale"
-      })
-      const product = await Product.create({
-          name,
-          description,
-          price,
-          image:result.secure_url,
-          category
-      });
-      res.status(201).json({
-          success: true,
-          product
-      })
-
+    const result = await cloudinary.uploader.upload(image);
+    const product = await Product.create({
+      name,
+      description,
+      price,
+      image: result.secure_url,
+      category,
+    });
+    res.status(201).json({
+      success: true,
+      product,
+    });
   } catch (error) {
-      console.log(error);
-      next(error);
-
+    console.log(error);
+    next(error);
   }
 };
+
 
 //! Controlador para obtener todos los productos sin importar la categoría
 exports.getAllProducts = async (req, res) => {
