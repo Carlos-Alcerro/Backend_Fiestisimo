@@ -1,35 +1,22 @@
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('cloudinary').v2;
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'imagenesfiestisimo', // Specify your Cloudinary folder name
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    // You can add more Cloudinary parameters as needed
-  },
-});
+const storage = multer.memoryStorage(); // Almacenamos la imagen en memoria
 
 const upload = multer({
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-      cb(null, true);
-    } else {
-      cb(null, false);
-    }
-  },
+  storage,
+  fileFilter,
   limits: {
-    fileSize: 25 * 1024 * 1024, // Adjust the file size limit as needed
+    fieldSize: 25 * 1024 * 1024,
   },
-});
+}).single('image'); // Asumiendo que estás enviando la imagen con el nombre 'image'
 
 module.exports = upload;
 
