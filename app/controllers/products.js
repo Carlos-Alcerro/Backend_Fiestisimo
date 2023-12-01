@@ -12,34 +12,32 @@ cloudinary.config({
 
 
 //! Controlador para registrar nuevos productos
-exports.createProduct = async (req, res, next) => {
-  const { name, description, price, category } = req.body;
+exports.createProduct = async (req, res,next) => {
+  const { name, description, price, image, category } = req.body;
+
 
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'No se proporcionó ninguna imagen.' });
-    }
+      const result = await cloudinary.uploader.upload(image, {
+          folder: "products",
+          // width: 300,
+          // crop: "scale"
+      })
+      const product = await Product.create({
+          name,
+          description,
+          price,
+          image:result.secure_url,
+          category
+      });
+      res.status(201).json({
+          success: true,
+          product
+      })
 
-    const result = await cloudinary.uploader.upload(req.file.buffer, {
-      folder: 'products',
-      // Otras opciones según tus necesidades
-    });
-
-    const product = await Product.create({
-      name,
-      description,
-      price,
-      image: result.secure_url,
-      category,
-    });
-
-    res.status(201).json({
-      success: true,
-      product,
-    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: 'Error al crear el producto.' });
+      console.log(error);
+      next(error);
+
   }
 };
 

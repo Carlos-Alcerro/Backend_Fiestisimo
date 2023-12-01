@@ -8,7 +8,17 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const storage = multer.memoryStorage(); // Almacenamos la imagen en memoria
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    const pathStorage = `public/images`;
+    cb(null, pathStorage);
+  },
+  filename: function(req, file, cb) {
+    const ext = file.originalname.split(".").pop();
+    const fileName = `file-${req.body.name.replace(/\s+/g, '_')}.${ext}`;
+    cb(null, fileName);
+  }
+});
 
 const upload = multer({
   storage,
@@ -16,8 +26,7 @@ const upload = multer({
   limits: {
     fieldSize: 25 * 1024 * 1024,
   },
-}).single('image'); // Asumiendo que estás enviando la imagen con el nombre 'image'
+});
 
 module.exports = upload;
-
 
