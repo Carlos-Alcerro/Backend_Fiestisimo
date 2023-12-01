@@ -36,11 +36,11 @@ app.use('/images', express.static(imagesPath));
 // Rutas 
 app.use('/fiestisimo', require('./app/routes'));
 
-const PORT_SERVER = process.env.PORT_SERVER || 3000;
+const PORT = process.env.PORT;
 
 
 //Levantando servidor
-http.listen(PORT_SERVER, () => {
-  console.log(`Servidor listo en el puerto ${PORT_SERVER}`)
+http.listen(PORT, () => {
+  console.log(`Servidor listo en el puerto ${PORT}`)
 
 });
