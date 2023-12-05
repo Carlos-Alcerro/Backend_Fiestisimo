@@ -26,10 +26,6 @@ const Product = connection.define('Product', {
     type: DataTypes.ENUM('Postres', 'Desayunos', 'Pasteles', 'Arreglos'),
     allowNull: false,
   },
-  favorito: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
 },);
 
 Product.sync({ force: false })
